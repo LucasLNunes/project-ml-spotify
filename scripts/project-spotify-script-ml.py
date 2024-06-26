@@ -17,8 +17,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import zscore
 # Configurações do Spotify
-client_id = '193f43dc4b32440ea2b54897e9e17aaf'
-client_secret = '7adc9087e5a04b658c41ce86d060b74c'
+client_id = '#Necessário Criar o Aplicativo do Spotify'
+client_secret = ' #Após Criar solicitar pegar na URL essa informação'
 redirect_uri = 'https://myfirstspotfyappforstudy.com/callback'
 scopes = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative user-read-recently-played user-top-read user-library-read'
 # URL de autorização

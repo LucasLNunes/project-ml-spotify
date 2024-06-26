@@ -13,8 +13,6 @@ Modelagem: Aplicação do algoritmo KMeans para agrupar músicas similares em cl
 Recomendação: Com base no perfil musical do usuário e nos clusters identificados, recomendação de novas músicas que compartilham características com as preferências do usuário.
 
 Estrutura do Repositório
-data/: Diretório contendo dados de exemplo ou link para dados externos necessários para reproduzir os resultados.
-notebooks/: Notebooks Jupyter utilizados para explorar dados, treinar modelos e visualizar resultados.
 scripts/: Scripts Python utilizados para coletar dados, pré-processar informações e implementar o sistema de recomendação.
 requirements.txt: Lista de dependências Python necessárias para executar o projeto.
 Como Usar
@@ -24,7 +22,7 @@ Clone este repositório:
 
 bash
 Copiar código
-git clone https://github.com/seu-usuario/seu-repositorio.git
+git clone https://github.com/LucasLNunes/project-spotify.git
 cd seu-repositorio
 Instale as dependências:
 
