@@ -3,12 +3,9 @@ import base64
 import pandas as pd
 import time
 from tqdm import tqdm
-
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-
 from sklearn.cluster import KMeans
-
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score, davies_bouldin_score
@@ -16,16 +13,20 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import zscore
+
 # Configurações do Spotify
 client_id = '#Necessário Criar o Aplicativo do Spotify'
 client_secret = ' #Após Criar solicitar pegar na URL essa informação'
-redirect_uri = 'https://myfirstspotfyappforstudy.com/callback'
+redirect_uri = 'É nessessário criar o Aplicativo spotify (ex: https://nome-do-aplicativo.com/callback)'
 scopes = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative user-read-recently-played user-top-read user-library-read'
+
 # URL de autorização
 auth_url = f"https://accounts.spotify.com/authorize?client_id={client_id}&response_type=code&redirect_uri={redirect_uri}&scope={scopes.replace(' ', '%20')}"
 print(f"Vá para o seguinte URL para autorizar o acesso: {auth_url}")
+
 # Código de autorização obtido após o usuário autorizar
 authorization_code = input("Insira o código de autorização aqui: ")
+
 # Trocar o código de autorização por um token de acesso
 token_url = "https://accounts.spotify.com/api/token"
 headers = {
@@ -40,9 +41,11 @@ data = {
 
 response = requests.post(token_url, headers=headers, data=data)
 token_info = response.json()
+
 # Verificar a resposta completa
 print("Resposta da solicitação para obter o token:")
 print(token_info)
+
 # Verificar se o token foi obtido com sucesso
 if 'access_token' in token_info:
     access_token = token_info['access_token']
@@ -51,6 +54,7 @@ if 'access_token' in token_info:
 else:
     print("Erro ao obter o token de acesso:")
     print(token_info)
+    
 # Função para obter o perfil do usuário
 def get_user_profile(access_token):
     url = 'https://api.spotify.com/v1/me'
@@ -59,6 +63,7 @@ def get_user_profile(access_token):
     }
     response = requests.get(url, headers=headers)
     return response.json()
+    
 # Função para obter as playlists do usuário
 def get_user_playlists(access_token):
     url = 'https://api.spotify.com/v1/me/playlists'
@@ -120,6 +125,7 @@ def get_all_playlist_tracks(access_token, playlist_id):
             break
 
     return all_tracks
+    
 # Função para converter as faixas em um DataFrame
 def tracks_to_dataframe(tracks_data):
     tracks = []
@@ -161,6 +167,7 @@ if all_tracks_combined:
 else:
     print("Nenhuma faixa encontrada nas playlists do usuário.")
 df_all_tracks['track_id'] = df_all_tracks['track_uri'].apply(lambda x: x.split(':')[-1])
+
 # Função para buscar características de uma música usando seu track_id
 def get_track_features(track_id, access_token):
     url = f"https://api.spotify.com/v1/audio-features/{track_id}"
@@ -169,6 +176,7 @@ def get_track_features(track_id, access_token):
     }
     response = requests.get(url, headers=headers)
     return response.json()
+    
 # Função para buscar características de músicas em lote
 def get_track_features_batch(track_ids, token):
     url = "https://api.spotify.com/v1/audio-features"
@@ -180,6 +188,7 @@ def get_track_features_batch(track_ids, token):
     }
     response = requests.get(url, headers=headers, params=params)
     return response.json()["audio_features"]
+    
 # / Lista para armazenar as características das músicas
 track_features_list = []
 
@@ -203,8 +212,10 @@ df_combined = pd.merge(df_all_tracks, df_track_features, left_on="track_id", rig
 
 # Exibir as primeiras linhas do DataFrame combinado
 print(df_combined.head())
+
 # Definir o cache dos IDs dos artistas
 artist_id_cache = {}
+
 # Definir o cache dos IDs dos artistas
 artist_id_cache = {}
 
@@ -235,6 +246,7 @@ def get_artist_id(artist_name, access_token, cache):
     else:
         return None
 # Função para buscar informações de artistas em lote
+
 def get_artists_info(artist_ids, access_token):
     url = "https://api.spotify.com/v1/artists"
     headers = {
@@ -256,6 +268,7 @@ for name in tqdm(df_combined['first_artist_name'], desc="Obtendo IDs dos artista
     artist_ids.append(artist_id)
 
 df_combined['artist_id'] = artist_ids
+
 # Lista para armazenar os gêneros musicais
 genres_dict = {}
 
@@ -315,6 +328,7 @@ def get_new_releases(access_token, country='BR', limit=50, max_results=500):
         offset += limit
     
     return all_releases
+    
 # Função para obter as faixas de um álbum
 def get_album_tracks(album_id, access_token):
     url = f"https://api.spotify.com/v1/albums/{album_id}/tracks"
@@ -324,6 +338,7 @@ def get_album_tracks(album_id, access_token):
     response = requests.get(url, headers=headers)
     response.raise_for_status()
     return response.json()
+    
 # Função para filtrar as faixas dos novos lançamentos
 def filter_new_tracks(new_releases, access_token):
     tracks = []
@@ -348,6 +363,7 @@ def filter_new_tracks(new_releases, access_token):
             }
             tracks.append(track_info)
     return pd.DataFrame(tracks)
+    
 # Obter novos lançamentos para o Brasil e Estados Unidos
 new_releases_br = get_new_releases(access_token, country='BR')
 new_releases_us = get_new_releases(access_token, country='US')
@@ -361,6 +377,7 @@ df_combined_tracks = pd.concat([df_brazilian_tracks, df_american_tracks], ignore
 
 # Exibir o DataFrame combinado
 print(df_combined_tracks.head())
+
 # / Lista para armazenar as características das músicas
 track_features_list = []
 
@@ -374,8 +391,7 @@ for i in range(0, len(df_combined_tracks["track_id"]), batch_size):
 
     # Imprimir o progresso a cada lote de 100 registros
     print(f"Processados {i + len(batch_ids)} de {len(df_combined_tracks['track_id'])} músicas")
-
-
+    
 # Converter a lista de características em um DataFrame
 df_track_features = pd.DataFrame(track_features_list)
 
@@ -426,14 +442,18 @@ for i in tqdm(range(0, len(artist_ids), batch_size), desc="Buscando informaçõe
 
 # Adicionar os gêneros ao DataFrame
 df_combined_tracks['genres'] = df_combined_tracks['artist_id'].map(genres_dict)
+
 # Excluir as colunas desnecessárias
 columns_to_drop = ['track_uri', 'track_id', 'type', 'id', 'uri', 'track_href', 'analysis_url', 'artist_id']
 df_combined = df_combined.drop(columns=columns_to_drop)
+
 # Dummyficar a coluna 'genres'
 # Primeiro, precisamos garantir que a coluna 'genres' não contenha valores NaN
 df_combined['genres'] = df_combined['genres'].fillna('')
+
 # Modificando a coluna 'genres' para manter apenas o primeiro texto antes da vírgula
 df_combined['genres'] = df_combined['genres'].apply(lambda x: x.split(',')[0].strip())
+
 # Seleciona todas as colunas numéricas, excluindo 'track_duration_ms', 'track_popularity' e 'key'
 numeric_columns = df_combined.select_dtypes(include=['number']).columns
 irrelevant_columns = ['track_duration_ms', 'track_popularity', 'key', 'duration_ms', 'tempo']
@@ -445,6 +465,7 @@ X = df_combined[numeric_columns]
 # Padronizando os dados
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
+
 # Testar diferentes valores de k usando o método do cotovelo
 sse = []
 k_range = range(1, 50)  # Ajuste o intervalo de k conforme necessário
@@ -460,6 +481,7 @@ plt.xlabel('Número de clusters (k)')
 plt.ylabel('Soma dos Quadrados das Distâncias (SSE)')
 plt.title('Método do Cotovelo para Determinar o Número de Clusters')
 plt.show()
+
 # Escolher o número de clusters baseado no gráfico do cotovelo
 k = 10  # Valor escolhido baseado no gráfico
 kmeans = KMeans(n_clusters=k, random_state=42)
@@ -467,40 +489,48 @@ clusters = kmeans.fit_predict(X_scaled)
 
 # Adicionar a coluna de clusters ao DataFrame original
 df_combined['cluster'] = clusters
+
 # Análise dos clusters apenas com colunas numéricas relevantes
 cluster_analysis = df_combined.groupby('cluster')[numeric_columns].mean()
-cluster_analysis
+
 # Identificar o cluster mais frequente nas músicas escutadas pelo usuário
 most_common_cluster = df_combined['cluster'].mode()[0]
+
 print(f"O cluster mais atrativo para o usuário é: {most_common_cluster}")
 # Analisar as características do cluster mais atrativo
 attractive_cluster_features = cluster_analysis.loc[most_common_cluster]
-attractive_cluster_features
+
 # Calcular métricas de avaliação
 silhouette_avg = silhouette_score(X_scaled, clusters)
 print(f"Silhouette Score: {silhouette_avg}")
 
 inertia = kmeans.inertia_
 print(f"Inertia: {inertia}")
+
 df_combined_tracks = df_combined_tracks.drop_duplicates()
+
 # Seleciona todas as colunas numéricas, excluindo 'track_duration_ms', 'track_popularity' e 'key'
 numeric_columns_tracks = df_combined_tracks.select_dtypes(include=['number']).columns
 numeric_columns_tracks = numeric_columns_tracks.difference(irrelevant_columns)
+
 # Padronizando os dados das novas músicas
 X_tracks = df_combined_tracks[numeric_columns_tracks]
 X_tracks_scaled = scaler.transform(X_tracks)
+
 # Predizer os clusters das novas músicas
 clusters_tracks = kmeans.predict(X_tracks_scaled)
+
 # Adicionar a coluna de clusters ao novo DataFrame
 df_combined_tracks['cluster'] = clusters_tracks
+
 # Filtrar músicas do cluster mais atrativo
 recommended_songs = df_combined_tracks[df_combined_tracks['cluster'] == most_common_cluster]
+
 # Selecionar algumas colunas relevantes para exibir
 recommended_songs = recommended_songs[['track_name', 'artist_name', 'album_name']]
+
 # Ordenar por popularidade e selecionar as top 20 músicas
 top_10_songs = recommended_songs.sort_values(by='track_name', ascending=False).head(10)
-top_10_songs
+print(top_10_songs)
+
 df_combined.columns
-# Análise dos clusters apenas com colunas numéricas relevantes
-cluster_analysis = df_combined.groupby('cluster')[numeric_columns].mean()
-cluster_analysis
