@@ -22,7 +22,7 @@ Clone este repositório:
 
 bash
 Copiar código
-git clone https://github.com/LucasLNunes/project-spotify.git
+git clone https://github.com/LucasLNunes/project-ml-spotify.git
 cd seu-repositorio
 Instale as dependências:
 
